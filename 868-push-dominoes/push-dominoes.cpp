@@ -1,35 +1,43 @@
 class Solution {
 public:
     string pushDominoes(string dominoes) {
-        int n = dominoes.size();
-        vector<int> forces(n, 0);
+        std::size_t num_of_dominoes = dominoes.size();
+        int last_right = -1;
+        int last_left = 0;
 
-        // Left to Right pass (apply rightward forces)
-        int force = 0;
-        for (int i = 0; i < n; i++) {
-            if (dominoes[i] == 'R') force = n;
-            else if (dominoes[i] == 'L') force = 0;
-            else force = max(force - 1, 0);
-            forces[i] += force;
+        for (std::size_t i = 0; i < num_of_dominoes; ++i) {
+            char c = dominoes[i];
+
+            if (c == 'R') {
+                if (last_right != -1) {
+                    for (std::size_t r = last_right + 1; r < i; ++r) {
+                        dominoes[r] = 'R';
+                    }
+                }
+                last_right = i;
+            } else if (c == 'L') {
+                if (last_right != -1) {
+                    for (std::size_t left_p = last_right + 1, right_p = i - 1;
+                         left_p < right_p; left_p++, right_p--) {
+                        dominoes[left_p] = 'R';
+                        dominoes[right_p] = 'L';
+                    }
+                    last_right = -1;
+                } else {
+                    for (std::size_t l = last_left; l < i; ++l) {
+                        dominoes[l] = 'L';
+                    }
+                }
+                last_left = i;
+            }
         }
 
-        // Right to Left pass (apply leftward forces)
-        force = 0;
-        for (int i = n - 1; i >= 0; i--) {
-            if (dominoes[i] == 'L') force = n;
-            else if (dominoes[i] == 'R') force = 0;
-            else force = max(force - 1, 0);
-            forces[i] -= force;
+        if (last_right != -1) {
+            for (int i = last_right + 1; i < num_of_dominoes; ++i) {
+                dominoes[i] = 'R';
+            }
         }
 
-        string result;
-        for (int f : forces) {
-            if (f > 0) result += 'R';
-            else if (f < 0) result += 'L';
-            else result += '.';
-        }
-
-        return result;
+        return dominoes;
     }
-
 };
