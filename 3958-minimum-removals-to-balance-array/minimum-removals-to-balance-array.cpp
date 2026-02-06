@@ -2,7 +2,7 @@ const int N=1024, mask=1023, bshift=10;
 int freq[N];
 
 void radix_sort(int* nums, int n) {
-    int* output = (int*)alloca(n * sizeof(int));  // buffer
+    int* output = (int*)alloca(n * sizeof(int));
     unsigned M=*max_element(nums, nums+n);
     const int Mround = max(1, int(31-countl_zero(M)+bshift)/bshift);
     int* in=nums;
@@ -28,7 +28,6 @@ void radix_sort(int* nums, int n) {
         swapped = !swapped;
     }
 
-    // If needed, copy back
     if (swapped)
         memcpy(nums, in, n * sizeof(int));
 }
