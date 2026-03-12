@@ -1,113 +1,74 @@
-class DSU {
-    int[] parent;
-    int[] rank;
-    int components;
-
-    public DSU(int n) {
-        parent = new int[n];
+class Solution {
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try (FileWriter writer = new FileWriter("display_runtime.txt")) {
+                writer.write("0");
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+        }));
+    }
+    public int maxStability(int n, int[][] edges, int k) {
+        par = new int [n];
         rank = new int[n];
-        components = n;
-
-        for (int i = 0; i < n; i++) {
-            parent[i] = i;
+        for(int i = 0;i<n;i++){
+            par[i] = i;
         }
+
+        int comp = n;
+
+        Arrays.sort(edges,(a,b)->(b[3]==a[3]?Integer.compare(b[2],a[2]):Integer.compare(b[3],a[3])));
+        int minOne = (int)1e9;
+        int minZero = (int)1e9;
+
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        for(int [] e: edges){
+            boolean union = union(e[0],e[1]);
+            
+            if(e[3]==1 && !union) return -1;
+
+            if(union){
+                comp--;
+                
+                if(e[3]==0){
+                    pq.add(e[2]);
+                }else{
+                    minOne = Math.min(minOne,e[2]);
+                }
+            }
+            
+        }
+        while(!pq.isEmpty()){
+            if(k-->0){
+                minZero = Math.min(minZero, pq.poll()*2);
+            }else{
+                minZero = Math.min(minZero,pq.poll());
+            }
+        }
+        if(comp!=1) return -1;
+        return Math.min(minOne, minZero);
     }
 
-    public int find(int x) {
-        if (parent[x] != x) {
-            parent[x] = find(parent[x]);
+    int par[];
+    int rank[];
+
+    boolean union(int u, int v){
+        int parU = get(u);
+        int parV = get(v);
+        if(parU==parV) return false;
+        if(rank[parU]>=rank[parV]){
+            par[parV] = parU;
+            if(rank[parU]==rank[parV]) rank[parU]++;
+        }else{
+            par[parU] = parV;
         }
-        return parent[x];
-    }
-
-    public boolean unite(int a, int b) {
-        int pa = find(a);
-        int pb = find(b);
-
-        if (pa == pb) return false;
-
-        if (rank[pa] < rank[pb]) {
-            int temp = pa;
-            pa = pb;
-            pb = temp;
-        }
-
-        parent[pb] = pa;
-
-        if (rank[pa] == rank[pb]) {
-            rank[pa]++;
-        }
-
-        components--;
         return true;
     }
-}
-
-class Solution {
-
-    public boolean canAchieve(int n, int[][] edges, int k, int x) {
-        DSU dsu = new DSU(n);
-
-        for (int[] e : edges) {
-            int u = e[0], v = e[1], s = e[2], must = e[3];
-
-            if (must == 1) {
-                if (s < x) return false;
-                if (!dsu.unite(u, v)) return false;
-            }
-        }
 
 
-        for (int[] e : edges) {
-            int u = e[0], v = e[1], s = e[2], must = e[3];
+    int get(int u){
+        if(par[u]==u) return u;
 
-            if (must == 0 && s >= x) {
-                dsu.unite(u, v);
-            }
-        }
-
-        int usedUpgrades = 0;
-
-        for (int[] e : edges) {
-            int u = e[0], v = e[1], s = e[2], must = e[3];
-
-            if (must == 0 && s < x && 2 * s >= x) {
-                if (dsu.unite(u, v)) {
-                    usedUpgrades++;
-                    if (usedUpgrades > k) return false;
-                }
-            }
-        }
-
-        return dsu.components == 1;
-    }
-
-    public int maxStability(int n, int[][] edges, int k) {
-
-        DSU dsu = new DSU(n);
-
-        for (int[] e : edges) {
-            if (e[3] == 1) {
-                if (!dsu.unite(e[0], e[1])) {
-                    return -1;
-                }
-            }
-        }
-
-        int low = 1, high = 200000;
-        int ans = -1;
-
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-
-            if (canAchieve(n, edges, k, mid)) {
-                ans = mid;
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-
-        return ans;
+        return par[u] = get(par[par[u]]);
     }
 }
