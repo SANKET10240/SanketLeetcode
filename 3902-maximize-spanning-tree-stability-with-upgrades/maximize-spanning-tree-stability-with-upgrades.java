@@ -48,7 +48,6 @@ class Solution {
     public boolean canAchieve(int n, int[][] edges, int k, int x) {
         DSU dsu = new DSU(n);
 
-        // Mandatory edges
         for (int[] e : edges) {
             int u = e[0], v = e[1], s = e[2], must = e[3];
 
@@ -58,7 +57,7 @@ class Solution {
             }
         }
 
-        // Free optional edges
+
         for (int[] e : edges) {
             int u = e[0], v = e[1], s = e[2], must = e[3];
 
@@ -67,7 +66,6 @@ class Solution {
             }
         }
 
-        // Upgrade edges
         int usedUpgrades = 0;
 
         for (int[] e : edges) {
@@ -86,7 +84,6 @@ class Solution {
 
     public int maxStability(int n, int[][] edges, int k) {
 
-        // Check mandatory cycle
         DSU dsu = new DSU(n);
 
         for (int[] e : edges) {
